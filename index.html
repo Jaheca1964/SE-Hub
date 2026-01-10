@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SE Hub - Mi Panel de Ingeniería</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <header>
         <h1>Software Engineering Hub</h1>
-        <button id="theme-toggle" onclick="SE_Hub.themeModule.toggle()">Modo Oscuro</button>
+        <button id="theme-toggle" onclick="app.toggleTheme()">Modo Oscuro</button>
         <p>Aprendizaje, Práctica y Documentación</p>
 
         <div class="card dashboard">
@@ -24,40 +25,28 @@
             <li><a href="#teoria">Teoría</a></li>
             <li><a href="#lab">Laboratorio JS</a></li>
             <li><a href="#proyectos">Mis Proyectos</a></li>
+            <li><a href="#stats">Estadísticas</a></li>
         </ul>
     </nav>
 
     <main id="app-container">
-        <section id="teoria">
-            <h2>Conceptos de Ingeniería</h2>
-            <div class="card" id="pattern-viewer">
-                <h3>Patrones de Diseño</h3>
-                <p>Haz clic para cargar información sobre patrones.</p>
-                <button onclick="mostrarConcepto('Solid')">Ver SOLID</button>
-            </div>
-        </section>
-
-        <hr>
-
-        <section id="lab">
-            <h2>Laboratorio de Algoritmos</h2>
-            <div class="code-area">
-                <p>Resultado del algoritmo actual:</p>
-                <div id="output" class="console">Esperando ejecución...</div>
-                <button onclick="ejecutarAlgoritmo()">Ejecutar Fibonacci</button>
-            </div>
-        </section>
-
         <section id="proyectos">
             <h2>Gestor de Tareas de Ingeniería</h2>
             <div class="card">
                 <div class="task-input-group">
                     <input type="text" id="taskInput" placeholder="Ej: Estudiar Patrones...">
-                    <button onclick="SE_Hub.todoModule.agregar()">Añadir Tarea</button>
+                    <button onclick="app.addTodo()">Añadir Tarea</button>
                 </div>
-                <small id="errorMsg" style="color: #e74c3c; display: none;">Error: La tarea ya existe o es muy corta.</sm🙃all>
-        
+                <small id="errorMsg" style="color: #e74c3c; display: none;">Error: La tarea ya existe o es muy
+                    corta.</small>
                 <ul id="taskList"></ul>
+            </div>
+        </section>
+
+        <section id="stats">
+            <h2>Estadísticas de Productividad</h2>
+            <div class="card">
+                <canvas id="taskChart" width="400" height="200"></canvas>
             </div>
         </section>
 
@@ -66,10 +55,9 @@
             <div class="card">
                 <div class="task-input-group">
                     <input type="text" id="githubUser" placeholder="Nombre de usuario en GitHub...">
-                    <button onclick=onclick="SE_Hub.apiModule.buscar()">Buscar Perfil</button>
+                    <button onclick="app.searchGithub()">Buscar Perfil</button>
                 </div>
-                <div id="githubResult">
-                </div>
+                <div id="githubResult"></div>
             </div>
         </section>
     </main>
@@ -78,21 +66,7 @@
         <p>Propiedad de: Ingeniero de Software Junior</p>
     </footer>
 
-    <script type="module" src="js/main.js"></script>
-    
-    <button onclick="app.toggleTheme()">Cambiar Tema</button>
-    <button onclick="app.addTodo()">Añadir Tarea</button>
-    <button onclick="app.searchGithub()">Buscar en GitHub</button>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <section id="stats">
-        <h2>Estadísticas de Productividad</h2>
-        <div class="card">
-            <canvas id="taskChart" width="400" height="200"></canvas>
-        </div>
-    </section>
+    <script type="module" src="./js/main.js"></script>
 </body>
 
 </html>
