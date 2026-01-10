@@ -32,22 +32,35 @@
         <section id="proyectos">
             <h2>Gestor de Tareas de Ingeniería</h2>
             <div class="card">
-                <div class="task-input-group">
-                    <input type="text" id="taskInput" placeholder="Ej: Estudiar Patrones...">
-
-                    <select id="taskPriority">
-                        <option value="low">Baja (Verde)</option>
-                        <option value="medium" selected>Media (Amarilla)</option>
-                        <option value="high">Alta (Roja)</option>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar tarea..." oninput="app.filterTodos()">
+                    <select id="filterPriority" onchange="app.filterTodos()">
+                        <option value="all">Todas las prioridades</option>
+                        <option value="high">Alta</option>
+                        <option value="medium">Media</option>
+                        <option value="low">Baja</option>
                     </select>
-
-                    <button onclick="app.addTodo()">Añadir Tarea</button>
                 </div>
-                <small id="errorMsg" class="error-message" style="display: none;">Error: La tarea ya existe o es muy
-                    corta.</small>
+        
+                <div class="task-input-group">
+                    <input type="text" id="taskInput" placeholder="Ej: Refactorizar módulos...">
+                    <select id="taskPriority">
+                        <option value="low">Baja</option>
+                        <option value="medium" selected>Media</option>
+                        <option value="high">Alta</option>
+                    </select>
+                    <button onclick="app.addTodo()">Añadir</button>
+                </div>
+        
                 <ul id="taskList"></ul>
+        
+                <div class="export-tools">
+                    <button onclick="app.exportJSON()" class="btn-secondary">📥 Exportar JSON</button>
+                </div>
             </div>
         </section>
+        
+        <div id="toast-container"></div>
 
         <section id="stats">
             <h2>Estadísticas de Productividad</h2>

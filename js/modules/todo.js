@@ -1,75 +1,74 @@
 import { State } from '../main.js';
 import { ChartModule } from './chart.js';
+import { Notifier } from './notifier.js';
 
-/**
- * Módulo de Gestión de Tareas (To-Do)
- * Maneja el ciclo de vida de las tareas: creación, persistencia y renderizado.
- */
 export const Todo = {
+    // ... (mantén agregar y eliminar como estaban, pero añade Notifier)
+    
     agregar() {
         const input = document.getElementById('taskInput');
-        const priority = document.getElementById('taskPriority');
-        const errorMsg = document.getElementById('errorMsg');
+        const priority = document.getElementById('taskPriority').value;
         
-        // Validación técnica: evitamos strings vacíos o muy cortos
         if (input.value.trim().length < 3) {
-            if (errorMsg) errorMsg.style.display = 'block';
+            Notifier.show("La tarea es muy corta", "error");
             return;
         }
-
-        if (errorMsg) errorMsg.style.display = 'none';
 
         const nuevaTarea = {
             id: Date.now(),
             texto: input.value.trim(),
-            prioridad: priority.value, // 'low', 'medium' o 'high'
+            prioridad: priority,
             completada: false
         };
         
         State.tareas.push(nuevaTarea);
         this.save();
-        
-        // Limpieza de UI
+        Notifier.show("Tarea añadida con éxito");
         input.value = "";
-        priority.value = "medium"; // Reset a prioridad por defecto
     },
 
-    eliminar(id) {
-        // Inmutabilidad: filtramos para obtener un nuevo array sin el ID seleccionado
-        State.tareas = State.tareas.filter(t => t.id !== id);
-        this.save();
+    // NUEVO: Lógica de Filtrado
+    filterTodos() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const priorityFilter = document.getElementById('filterPriority').value;
+
+        const tareasFiltradas = State.tareas.filter(t => {
+            const coincideTexto = t.texto.toLowerCase().includes(query);
+            const coincidePrioridad = priorityFilter === 'all' || t.prioridad === priorityFilter;
+            return coincideTexto && coincidePrioridad;
+        });
+
+        this.render(tareasFiltradas);
     },
 
-    save() {
-        // Persistencia síncrona en LocalStorage
-        localStorage.setItem('mis_tareas', JSON.stringify(State.tareas));
+    // NUEVO: Exportación de Datos
+    exportJSON() {
+        const dataStr = JSON.stringify(State.tareas, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
         
-        // Notificamos a otros módulos que el estado cambió
-        this.render();
-        ChartModule.update();
-        this.updateBadge();
+        const exportFileDefaultName = 'tareas_ingenieria.json';
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        Notifier.show("Archivo JSON generado", "info");
     },
 
-    updateBadge() {
-        const badge = document.getElementById('taskCount');
-        if (badge) badge.textContent = State.tareas.length;
-    },
-
-    render() {
+    render(dataToRender = State.tareas) {
         const lista = document.getElementById('taskList');
-        if (!lista) return;
-
-        // Renderizado dinámico inyectando la clase de prioridad para el CSS
-        lista.innerHTML = State.tareas.map(t => `
+        lista.innerHTML = dataToRender.map(t => `
             <li class="task-item ${t.prioridad}">
-                <div class="task-content">
-                    <span class="priority-dot"></span>
-                    <span class="task-text">${t.texto}</span>
-                </div>
-                <button class="btn-delete" onclick="app.deleteTodo(${t.id})" title="Eliminar tarea">
-                    🗑️
-                </button>
+                <span>${t.texto}</span>
+                <button onclick="app.deleteTodo(${t.id})">🗑️</button>
             </li>
         `).join('');
+    },
+    
+    save() {
+        localStorage.setItem('mis_tareas', JSON.stringify(State.tareas));
+        this.render();
+        ChartModule.update();
+        document.getElementById('taskCount').textContent = State.tareas.length;
     }
 };

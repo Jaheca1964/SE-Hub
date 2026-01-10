@@ -18,6 +18,8 @@ window.app = Object.freeze({
     toggleTheme: () => Theme.toggle(),
     addTodo: () => Todo.agregar(),
     deleteTodo: (id) => Todo.eliminar(id),
+    filterTodos: () => Todo.filterTodos(),
+    exportJSON: () => Todo.exportJSON(),
     runTests: () => {
         console.clear();
         Tester.runTodoTests(Todo, State);
