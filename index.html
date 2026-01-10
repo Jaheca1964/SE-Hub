@@ -22,10 +22,9 @@
 
     <nav>
         <ul>
-            <li><a href="#teoria">Teoría</a></li>
-            <li><a href="#lab">Laboratorio JS</a></li>
             <li><a href="#proyectos">Mis Proyectos</a></li>
             <li><a href="#stats">Estadísticas</a></li>
+            <li><a href="#api-section">GitHub Talent</a></li>
         </ul>
     </nav>
 
@@ -35,9 +34,16 @@
             <div class="card">
                 <div class="task-input-group">
                     <input type="text" id="taskInput" placeholder="Ej: Estudiar Patrones...">
+
+                    <select id="taskPriority">
+                        <option value="low">Baja (Verde)</option>
+                        <option value="medium" selected>Media (Amarilla)</option>
+                        <option value="high">Alta (Roja)</option>
+                    </select>
+
                     <button onclick="app.addTodo()">Añadir Tarea</button>
                 </div>
-                <small id="errorMsg" style="color: #e74c3c; display: none;">Error: La tarea ya existe o es muy
+                <small id="errorMsg" class="error-message" style="display: none;">Error: La tarea ya existe o es muy
                     corta.</small>
                 <ul id="taskList"></ul>
             </div>

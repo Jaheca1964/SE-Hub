@@ -1,31 +1,47 @@
-// 1. Solo importaciones al principio
+// 1. Importaciones de módulos (Interfaces claras)
 import { Theme } from './modules/theme.js';
 import { Todo } from './modules/todo.js';
 import { ChartModule } from './modules/chart.js';
 import { Tester } from './modules/testing.js';
 
-// 2. Definición del Estado
+// 2. Definición del Estado Central (Single Source of Truth)
 export const State = {
     tareas: JSON.parse(localStorage.getItem('mis_tareas')) || [],
-    isDarkMode: localStorage.getItem('theme') === 'dark'
-};
-
-// 3. Vinculación al objeto global 'window'
-window.app = {
-    toggleTheme: () => Theme.toggle(),
-    addTodo: () => Todo.agregar(),
-    deleteTodo: (id) => Todo.eliminar(id),
-    runTests: () => Tester.runTodoTests(Todo, State),
-    searchGithub: async () => {
-        const { apiModule } = await import('./modules/api.js');
-        apiModule.buscar();
+    get isDarkMode() { 
+        return document.body.classList.contains('dark-theme'); 
     }
 };
 
-// 4. Inicialización
+// 3. Objeto Global de la Aplicación (Facade Pattern)
+// Usamos Object.freeze para evitar que extensiones o scripts externos lo modifiquen
+window.app = Object.freeze({
+    toggleTheme: () => Theme.toggle(),
+    addTodo: () => Todo.agregar(),
+    deleteTodo: (id) => Todo.eliminar(id),
+    runTests: () => {
+        console.clear();
+        Tester.runTodoTests(Todo, State);
+    },
+    searchGithub: async () => {
+        try {
+            // Importación dinámica para optimizar la carga inicial (Lazy Loading)
+            const { apiModule } = await import('./modules/api.js');
+            await apiModule.buscar();
+        } catch (error) {
+            console.error("Error al cargar el módulo de API:", error);
+        }
+    }
+});
+
+// 4. Ciclo de Vida de Inicio
 document.addEventListener('DOMContentLoaded', () => {
-    Theme.init();
-    Todo.render();
-    ChartModule.init();
-    console.log("✅ SE-Hub: Sistema listo.");
+    try {
+        Theme.init();
+        Todo.render();
+        ChartModule.init();
+        
+        console.log("%c✅ SE-Hub: Arquitectura Modular Lista", "color: #2ecc71; font-weight: bold; font-size: 12px;");
+    } catch (error) {
+        console.error("❌ Fallo crítico en la inicialización:", error);
+    }
 });

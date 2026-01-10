@@ -1,35 +1,38 @@
-# Software Engineering Hub (SE Hub) 🚀
+# 🚀 Software Engineering Hub (SE-Hub)
 
-Este es un panel de control interactivo diseñado para ingenieros de software junior que buscan centralizar su aprendizaje, práctica de algoritmos y gestión de productividad. El proyecto aplica principios de **arquitectura modular** y **diseño orientado a componentes** con JavaScript Vanilla.
+![Status](https://img.shields.io/badge/Status-Functional-success)
+![Architecture](https://img.shields.io/badge/Architecture-ES6%20Modules-blue)
+![Testing](https://img.shields.io/badge/Tests-Passing-brightgreen)
+![User](https://img.shields.io/badge/User-Jaheca1964-orange)
+
+**SE-Hub** es un panel de control avanzado para ingenieros de software, diseñado bajo principios de **Clean Code** y **Arquitectura Modular**. Este proyecto demuestra el manejo de estado sólido, manipulación dinámica del DOM y consumo de APIs asíncronas.
 
 
 
 ## 🛠️ Stack Tecnológico
 
-* **Frontend:** HTML5, CSS3 (Variables modernas), JavaScript ES6+.
-* **Visualización:** [Chart.js](https://www.chartjs.org/) para métricas de productividad.
-* **APIs:** Integración con la GitHub Rest API.
-* **Persistencia:** LocalStorage para almacenamiento local sin base de datos externa.
+* **HTML5** (Semántica estructural)
+* **CSS3** (Variables dinámicas y Responsive Design)
+* **JavaScript (ES6+)** (Arquitectura modular y Promesas)
+* **Chart.js** (Visualización de datos de productividad)
+* **GitHub API** (Integración de servicios externos)
 
-## 🏗️ Arquitectura del Proyecto
+## 🏗️ Arquitectura del Sistema
 
-El proyecto utiliza un **Patrón de Diseño Modular (ES6 Modules)** para asegurar el bajo acoplamiento y la alta cohesión:
+El proyecto implementa el patrón de **Módulos ES6**, asegurando que cada componente tenga una única responsabilidad (Single Responsibility Principle):
 
-* `js/main.js`: Punto de entrada y orquestador del estado global.
-* `js/modules/todo.js`: Lógica de negocio para la gestión de tareas y validaciones.
-* `js/modules/chart.js`: Abstracción de la librería de visualización de datos.
-* `js/modules/theme.js`: Manejo de preferencias de usuario (Dark/Light Mode).
-* `js/modules/api.js`: Lógica asíncrona para comunicación externa.
+* **`main.js`**: Orquestador central y gestor del estado global (`State`).
+* **`theme.js`**: Controlador de apariencia y persistencia (Dark/Light Mode).
+* **`todo.js`**: Motor de lógica de negocio para la gestión de tareas.
+* **`chart.js`**: Capa de abstracción para métricas visuales.
+* **`api.js`**: Módulo de comunicación asíncrona (Lazy Loading).
+* **`testing.js`**: Suite de pruebas unitarias integrada.
 
-## 🚀 Funcionalidades Clave
 
-1.  **Gestión de Tareas con Programación Defensiva:** Validaciones de longitud y duplicidad de datos.
-2.  **Visualización en Tiempo Real:** Gráficos dinámicos que reflejan la productividad del usuario.
-3.  **Modo Oscuro Persistente:** Uso de CSS Variables y memoria local para mejorar la experiencia de usuario.
-4.  **Consumo de API Asíncrona:** Uso de `async/await` para obtener perfiles de ingeniería desde GitHub.
 
-## 📦 Instalación y Uso
+## 🧪 Control de Calidad (Testing)
 
-1. Clonar el repositorio:
-   ```bash
-   git clone [https://github.com/Jaheca1964/se-hub.git](https://github.com/Jaheca1964/se-hub.git)
+El sistema incluye una suite de pruebas propia para validar la integridad de los datos sin depender de librerías externas. Para ejecutar los tests, abre la consola del navegador y escribe:
+
+```javascript
+app.runTests();
