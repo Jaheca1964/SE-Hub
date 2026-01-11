@@ -36,14 +36,16 @@ window.app = Object.freeze({
 });
 
 // 4. Ciclo de Vida de Inicio
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         Theme.init();
-        Todo.render();
-        ChartModule.init();
         
-        console.log("%c✅ SE-Hub: Arquitectura Modular Lista", "color: #2ecc71; font-weight: bold; font-size: 12px;");
+        // El sistema espera a Firebase antes de renderizar el resto
+        await Todo.cargar(); 
+        
+        ChartModule.init();
+        console.log("✅ SE-Hub: Conexión con Firebase establecida.");
     } catch (error) {
-        console.error("❌ Fallo crítico en la inicialización:", error);
+        console.error("Error en la inicialización:", error);
     }
 });

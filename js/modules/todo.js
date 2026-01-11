@@ -1,11 +1,27 @@
 import { State } from '../main.js';
 import { ChartModule } from './chart.js';
 import { Notifier } from './notifier.js';
+import { Database } from './database.js';
 
+/**
+ * Módulo de Gestión de Tareas con Persistencia en Firebase
+ */
 export const Todo = {
-    // ... (mantén agregar y eliminar como estaban, pero añade Notifier)
-    
-    agregar() {
+    // 1. Cargar tareas desde la nube al iniciar
+    async cargar() {
+        try {
+            State.tareas = await Database.getAll();
+            this.render();
+            ChartModule.update();
+            this.updateBadge();
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+            Notifier.show("Error al sincronizar con la nube", "error");
+        }
+    },
+
+    // 2. Agregar tarea a Firebase y al Estado Local
+    async agregar() {
         const input = document.getElementById('taskInput');
         const priority = document.getElementById('taskPriority').value;
         
@@ -15,19 +31,44 @@ export const Todo = {
         }
 
         const nuevaTarea = {
-            id: Date.now(),
             texto: input.value.trim(),
             prioridad: priority,
-            completada: false
+            completada: false,
+            createdAt: new Date().getTime() // Útil para ordenar por fecha
         };
         
-        State.tareas.push(nuevaTarea);
-        this.save();
-        Notifier.show("Tarea añadida con éxito");
-        input.value = "";
+        try {
+            // Guardar en la nube y obtener el ID generado por Firestore
+            const id = await Database.save(nuevaTarea);
+            
+            // Actualizar estado local
+            State.tareas.push({ id, ...nuevaTarea });
+            
+            this.save(); // Actualiza UI
+            Notifier.show("Tarea guardada en la nube ☁️");
+            input.value = "";
+        } catch (error) {
+            const id = await Database.save(nuevaTarea);
+            Notifier.show("Error al guardar la tarea", "error");
+        }
     },
 
-    // NUEVO: Lógica de Filtrado
+    // 3. Eliminar de Firebase y del Estado Local
+    async eliminar(id) {
+        try {
+            await Database.delete(id);
+            
+            // Inmutabilidad: filtramos para obtener un nuevo array
+            State.tareas = State.tareas.filter(t => t.id !== id);
+            
+            this.save();
+            Notifier.show("Tarea eliminada correctamente", "info");
+        } catch (error) {
+            Notifier.show("No se pudo eliminar la tarea", "error");
+        }
+    },
+
+    // 4. Filtrado en tiempo real (Lógica local sobre datos sincronizados)
     filterTodos() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const priorityFilter = document.getElementById('filterPriority').value;
@@ -41,34 +82,46 @@ export const Todo = {
         this.render(tareasFiltradas);
     },
 
-    // NUEVO: Exportación de Datos
+    // 5. Exportación de Datos a JSON
     exportJSON() {
         const dataStr = JSON.stringify(State.tareas, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         
-        const exportFileDefaultName = 'tareas_ingenieria.json';
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.setAttribute('download', 'se_hub_backup.json');
         linkElement.click();
         
-        Notifier.show("Archivo JSON generado", "info");
+        Notifier.show("Copia de seguridad generada", "info");
+    },
+
+    // 6. Utilidades de UI
+    updateBadge() {
+        const badge = document.getElementById('taskCount');
+        if (badge) badge.textContent = State.tareas.length;
+    },
+
+    save() {
+        // Ya no es obligatorio el localStorage, pero ayuda a la velocidad de carga inicial
+        localStorage.setItem('mis_tareas_backup', JSON.stringify(State.tareas));
+        this.render();
+        ChartModule.update();
+        this.updateBadge();
     },
 
     render(dataToRender = State.tareas) {
         const lista = document.getElementById('taskList');
+        if (!lista) return;
+
         lista.innerHTML = dataToRender.map(t => `
             <li class="task-item ${t.prioridad}">
-                <span>${t.texto}</span>
-                <button onclick="app.deleteTodo(${t.id})">🗑️</button>
+                <div class="task-content">
+                    <span class="task-text">${t.texto}</span>
+                </div>
+                <button class="btn-delete" onclick="app.deleteTodo('${t.id}')">
+                    🗑️
+                </button>
             </li>
         `).join('');
-    },
-    
-    save() {
-        localStorage.setItem('mis_tareas', JSON.stringify(State.tareas));
-        this.render();
-        ChartModule.update();
-        document.getElementById('taskCount').textContent = State.tareas.length;
     }
 };
