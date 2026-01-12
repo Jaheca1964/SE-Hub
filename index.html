@@ -18,6 +18,20 @@
         <div class="card dashboard">
             <p>Tareas Activas: <span id="taskCount">0</span></p>
         </div>
+
+        <h1>SE-Hub</h1>
+        <div id="authContainer">
+            <button id="btnLogin" class="btn-google" onclick="app.login()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Ingresar con Google
+            </button>
+        
+            <div id="userProfile" class="hidden">
+                <img id="userPhoto" src="" alt="Perfil">
+                <span id="userName"></span>
+                <button onclick="app.logout()" class="btn-icon">🚪</button>
+            </div>
+        </div>
     </header>
 
     <nav>

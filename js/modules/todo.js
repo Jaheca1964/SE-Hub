@@ -3,30 +3,35 @@ import { ChartModule } from './chart.js';
 import { Notifier } from './notifier.js';
 import { Database } from './database.js';
 
-/**
- * Módulo de Gestión de Tareas con Persistencia en Firebase
- */
 export const Todo = {
-    // 1. Cargar tareas desde la nube al iniciar
+    // 1. Cargar tareas filtradas por el usuario actual
     async cargar() {
+        if (!State.user) return; // Seguridad: Si no hay usuario, no cargamos nada
+
         try {
-            State.tareas = await Database.getAll();
+            // Pasamos el UID del usuario a la base de datos para traer solo sus tareas
+            State.tareas = await Database.getAllByUser(State.user.uid);
             this.render();
             ChartModule.update();
             this.updateBadge();
         } catch (error) {
-            console.error("Error al cargar datos:", error);
-            Notifier.show("Error al sincronizar con la nube", "error");
+            console.error("Error al sincronizar:", error);
+            Notifier.show("Error al obtener tus tareas", "error");
         }
     },
 
-    // 2. Agregar tarea a Firebase y al Estado Local
+    // 2. Agregar tarea vinculada permanentemente al UID del usuario
     async agregar() {
         const input = document.getElementById('taskInput');
         const priority = document.getElementById('taskPriority').value;
         
+        if (!State.user) {
+            Notifier.show("Debes iniciar sesión primero", "error");
+            return;
+        }
+
         if (input.value.trim().length < 3) {
-            Notifier.show("La tarea es muy corta", "error");
+            Notifier.show("Descripción demasiado corta", "error");
             return;
         }
 
@@ -34,41 +39,36 @@ export const Todo = {
             texto: input.value.trim(),
             prioridad: priority,
             completada: false,
-            createdAt: new Date().getTime() // Útil para ordenar por fecha
+            userId: State.user.uid, // <--- CLAVE: Vinculación con el usuario
+            createdAt: Date.now()
         };
         
         try {
-            // Guardar en la nube y obtener el ID generado por Firestore
             const id = await Database.save(nuevaTarea);
-            
-            // Actualizar estado local
             State.tareas.push({ id, ...nuevaTarea });
             
-            this.save(); // Actualiza UI
-            Notifier.show("Tarea guardada en la nube ☁️");
+            this.save(); 
+            Notifier.show(`Tarea guardada para ${State.user.displayName.split(' ')[0]} ☁️`);
             input.value = "";
         } catch (error) {
-            const id = await Database.save(nuevaTarea);
-            Notifier.show("Error al guardar la tarea", "error");
+            console.error("Error al guardar:", error);
+            Notifier.show("Error de permisos en la nube", "error");
         }
     },
 
-    // 3. Eliminar de Firebase y del Estado Local
+    // 3. Eliminar tarea (Firestore verificará que el userId coincida)
     async eliminar(id) {
         try {
             await Database.delete(id);
-            
-            // Inmutabilidad: filtramos para obtener un nuevo array
             State.tareas = State.tareas.filter(t => t.id !== id);
-            
             this.save();
-            Notifier.show("Tarea eliminada correctamente", "info");
+            Notifier.show("Tarea eliminada", "info");
         } catch (error) {
-            Notifier.show("No se pudo eliminar la tarea", "error");
+            Notifier.show("No tienes permiso para borrar esto", "error");
         }
     },
 
-    // 4. Filtrado en tiempo real (Lógica local sobre datos sincronizados)
+    // 4. Filtrado local (Buscador)
     filterTodos() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const priorityFilter = document.getElementById('filterPriority').value;
@@ -82,28 +82,13 @@ export const Todo = {
         this.render(tareasFiltradas);
     },
 
-    // 5. Exportación de Datos a JSON
-    exportJSON() {
-        const dataStr = JSON.stringify(State.tareas, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', 'se_hub_backup.json');
-        linkElement.click();
-        
-        Notifier.show("Copia de seguridad generada", "info");
-    },
-
-    // 6. Utilidades de UI
+    // 5. Utilidades de Interfaz
     updateBadge() {
         const badge = document.getElementById('taskCount');
         if (badge) badge.textContent = State.tareas.length;
     },
 
     save() {
-        // Ya no es obligatorio el localStorage, pero ayuda a la velocidad de carga inicial
-        localStorage.setItem('mis_tareas_backup', JSON.stringify(State.tareas));
         this.render();
         ChartModule.update();
         this.updateBadge();
@@ -112,6 +97,11 @@ export const Todo = {
     render(dataToRender = State.tareas) {
         const lista = document.getElementById('taskList');
         if (!lista) return;
+
+        if (dataToRender.length === 0) {
+            lista.innerHTML = `<p class="empty-msg">No hay tareas pendientes.</p>`;
+            return;
+        }
 
         lista.innerHTML = dataToRender.map(t => `
             <li class="task-item ${t.prioridad}">
