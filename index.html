@@ -4,102 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SE Hub - Mi Panel de Ingeniería</title>
+    <title>SE-Hub | Dashboard de Ingeniería</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script type="module" src="js/main.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <h1>Software Engineering Hub</h1>
-        <button id="theme-toggle" onclick="app.toggleTheme()">Modo Oscuro</button>
-        <p>Aprendizaje, Práctica y Documentación</p>
+<body class="dark-theme">
+    <div id="notification-area"></div>
 
-        <div class="card dashboard">
-            <p>Tareas Activas: <span id="taskCount">0</span></p>
-        </div>
-
-        <h1>SE-Hub</h1>
-        <div id="authContainer">
-            <button id="btnLogin" class="btn-google" onclick="app.login()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                Ingresar con Google
-            </button>
-        
-            <div id="userProfile" class="hidden">
-                <img id="userPhoto" src="" alt="Perfil">
-                <span id="userName"></span>
-                <button onclick="app.logout()" class="btn-icon">🚪</button>
-            </div>
-        </div>
-    </header>
-
-    <nav>
-        <ul>
-            <li><a href="#proyectos">Mis Proyectos</a></li>
-            <li><a href="#stats">Estadísticas</a></li>
-            <li><a href="#api-section">GitHub Talent</a></li>
-        </ul>
-    </nav>
-
-    <main id="app-container">
-        <section id="proyectos">
-            <h2>Gestor de Tareas de Ingeniería</h2>
-            <div class="card">
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Buscar tarea..." oninput="app.filterTodos()">
-                    <select id="filterPriority" onchange="app.filterTodos()">
-                        <option value="all">Todas las prioridades</option>
-                        <option value="high">Alta</option>
-                        <option value="medium">Media</option>
-                        <option value="low">Baja</option>
-                    </select>
-                </div>
-        
-                <div class="task-input-group">
-                    <input type="text" id="taskInput" placeholder="Ej: Refactorizar módulos...">
-                    <select id="taskPriority">
-                        <option value="low">Baja</option>
-                        <option value="medium" selected>Media</option>
-                        <option value="high">Alta</option>
-                    </select>
-                    <button onclick="app.addTodo()">Añadir</button>
-                </div>
-        
-                <ul id="taskList"></ul>
-        
-                <div class="export-tools">
-                    <button onclick="app.exportJSON()" class="btn-secondary">📥 Exportar JSON</button>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div id="authContainer">
+                <button id="btnLogin" class="btn-google" onclick="app.login()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+                    Ingresar
+                </button>
+                <div id="userProfile" class="user-info hidden">
+                    <img id="userPhoto" src="" alt="Avatar">
+                    <div class="user-meta">
+                        <span id="userName">Ingeniero</span>
+                        <button onclick="app.logout()" class="logout-link">Cerrar Sesión</button>
+                    </div>
                 </div>
             </div>
-        </section>
-        
-        <div id="toast-container"></div>
+            <nav class="side-nav">
+                <p class="nav-label">Menú</p>
+                <ul>
+                    <li class="active">📊 Dashboard</li>
+                    <li onclick="app.exportJSON()" style="cursor:pointer">📤 Exportar JSON</li>
+                </ul>
+            </nav>
+        </aside>
 
-        <section id="stats">
-            <h2>Estadísticas de Productividad</h2>
-            <div class="card">
-                <canvas id="taskChart" width="400" height="200"></canvas>
-            </div>
-        </section>
-
-        <section id="api-section">
-            <h2>Explorador de Talento (GitHub API)</h2>
-            <div class="card">
-                <div class="task-input-group">
-                    <input type="text" id="githubUser" placeholder="Nombre de usuario en GitHub...">
-                    <button onclick="app.searchGithub()">Buscar Perfil</button>
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1>Software Engineering Hub</h1>
+                    <p>Aprendizaje, Práctica y Documentación</p>
                 </div>
-                <div id="githubResult"></div>
+                <button class="theme-toggle" onclick="app.toggleTheme()">🌙</button>
+            </header>
+
+            <div class="dashboard-grid">
+                <section class="controls-column">
+                    <div class="glass-card">
+                        <h3>Gestor de Tareas de Ingeniería</h3>
+                        <div class="input-stack">
+                            <input type="text" id="taskInput" placeholder="Nueva tarea...">
+                            <div class="input-row">
+                                <select id="taskPriority">
+                                    <option value="low">Rutina (Baja)</option>
+                                    <option value="medium" selected>Importante (Media)</option>
+                                    <option value="high">Urgente (Alta)</option>
+                                </select>
+                                <button class="btn-add" onclick="app.addTodo()">Agregar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chart-container">
+                        <h3>Métricas de Productividad</h3>
+                        <canvas id="taskChart"></canvas>
+                        <p class="status-msg">¡Estás al día! Revisa tus métricas.</p>
+                    </div>
+                </section>
+
+                <section class="tasks-column">
+                    <div class="filter-bar glass-card">
+                        <input type="text" id="searchInput" oninput="app.filterTodos()"
+                            placeholder="🔍 Buscar tarea...">
+                        <span class="badge">Activas: <span id="taskCount">0</span></span>
+                    </div>
+                    <div id="taskList" class="tasks-grid">
+                    </div>
+                </section>
             </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>Propiedad de: Ingeniero de Software Junior</p>
-    </footer>
-
-    <script type="module" src="./js/main.js"></script>
+        </main>
+    </div>
 </body>
 
 </html>

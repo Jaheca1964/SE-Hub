@@ -57,7 +57,7 @@ export const ChartModule = {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') || '#333' }
+                        labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') || '#ffffff' }
                     }
                 }
             }
